@@ -12,8 +12,14 @@
   const targetHint = document.getElementById("targetHint");
   const targetRing = document.getElementById("targetRing");
   const lessonEyebrow = document.getElementById("lessonEyebrow");
+  const progressTrack = document.getElementById("progressTrack");
   const progressFill = document.getElementById("progressFill");
   const scoreLabel = document.getElementById("scoreLabel");
+  const scorePanelTitle = document.getElementById("scorePanelTitle");
+  const scorePanelSub = document.getElementById("scorePanelSub");
+  const modeLabel = document.getElementById("modeLabel");
+  const modeSub = document.getElementById("modeSub");
+  const modeSwitch = document.getElementById("modeSwitch");
 
   const keySizeSelect = document.getElementById("keySizeSelect");
   const keyCountCustom = document.getElementById("keyCountCustom");
@@ -52,11 +58,10 @@
     renderKeyboardForCount(count);
   });
 
-  // Render inicial con el valor por defecto del select (61 teclas).
   renderKeyboardForCount(parseInt(keySizeSelect.value, 10));
 
   function maybeAutoSizeFromDevice(deviceName) {
-    if (userChoseSize) return; // el usuario ya eligió a mano, no lo pisamos
+    if (userChoseSize) return;
     const preset = KeyboardRenderer.presetForDeviceName(deviceName);
     if (!preset) return;
     keySizeSelect.value = String(preset);
@@ -67,6 +72,18 @@
       `(Web MIDI no permite leer la cantidad real de teclas del hardware — esto es una ` +
       `estimación por nombre de dispositivo). Cambiala arriba si no es correcta.`;
   }
+
+  // --- Selector de modalidad (Espera / Libre) ---
+  modeSwitch.addEventListener("click", (e) => {
+    const btn = e.target.closest(".mode-switch__btn");
+    if (!btn) return;
+    const newMode = btn.dataset.mode;
+    modeSwitch.querySelectorAll(".mode-switch__btn").forEach((b) => {
+      b.setAttribute("aria-pressed", String(b === btn));
+    });
+    KeyboardRenderer.clearStates();
+    GameLogic.setMode(newMode);
+  });
 
   function setStatus(state, deviceName) {
     statusPill.dataset.state = state;
@@ -91,24 +108,48 @@
     }
   }
 
-  function handleAdvance({ done, targetNote, targetLabel: label, progress, title }) {
-    lessonEyebrow.textContent = `Nivel 0 · ${title}`;
-    progressFill.style.width = `${Math.round(progress * 100)}%`;
+  function handleAdvance({ mode, done, targetNote, targetLabel: label, hint, progress, title }) {
     targetRing.dataset.feedback = "";
 
-    if (done) {
-      targetLabel.textContent = "🎉";
-      targetHint.textContent = "Lección completa. ¡Muy bien!";
+    if (mode === "wait") {
+      lessonEyebrow.textContent = `Nivel 0 · ${title}`;
+      progressTrack.style.display = "";
+      progressFill.style.width = `${Math.round(progress * 100)}%`;
+      modeLabel.textContent = "Modo Espera";
+      modeSub.textContent = "La lección se pausa hasta que toques la nota correcta.";
+      scorePanelTitle.textContent = "Aciertos";
+      scorePanelSub.textContent = "Notas correctas en esta lección.";
+      scoreLabel.textContent = "0 / 0";
+
+      if (done) {
+        targetLabel.textContent = "🎉";
+        targetHint.textContent = hint;
+        KeyboardRenderer.clearStates();
+        return;
+      }
+      targetLabel.textContent = label;
+      targetHint.textContent = hint;
+      KeyboardRenderer.setTarget(targetNote);
+    } else {
+      lessonEyebrow.textContent = `Nivel 0 · ${title}`;
+      progressTrack.style.display = "none";
+      modeLabel.textContent = "Modo Libre";
+      modeSub.textContent = "Tocá lo que quieras: no hay notas correctas ni incorrectas.";
+      scorePanelTitle.textContent = "Notas tocadas";
+      scorePanelSub.textContent = "Cantidad de notas que tocaste en esta sesión.";
+      scoreLabel.textContent = "0";
+      targetLabel.textContent = label;
+      targetHint.textContent = hint;
       KeyboardRenderer.clearStates();
-      return;
     }
-    targetLabel.textContent = label;
-    targetHint.textContent = "Tocá la tecla iluminada en tu piano";
-    KeyboardRenderer.setTarget(targetNote);
   }
 
-  function handleScoreChange({ hits, attempts }) {
-    scoreLabel.textContent = `${hits} / ${attempts}`;
+  function handleScoreChange(payload) {
+    if (payload.mode === "wait") {
+      scoreLabel.textContent = `${payload.hits} / ${payload.attempts}`;
+    } else {
+      scoreLabel.textContent = String(payload.count);
+    }
   }
 
   GameLogic.init({ onAdvance: handleAdvance, onScoreChange: handleScoreChange });
@@ -116,13 +157,27 @@
   MidiEngine.init({
     onStatusChange: setStatus,
     onNoteOn: (noteNumber) => {
-      const result = GameLogic.submitNote(noteNumber);
-      if (!result) return; // lección ya terminada
-      targetRing.dataset.feedback = result;
-      KeyboardRenderer.flash(noteNumber, result);
-      if (result === "wrong") {
-        // Vuelve a mostrar el objetivo tras el destello rojo.
+      const outcome = GameLogic.submitNote(noteNumber);
+      if (!outcome) return;
+
+      if (outcome.result === "free") {
+        targetLabel.textContent = outcome.label;
+        targetHint.textContent = "Explorá el teclado con confianza — acá no hay errores.";
+        targetRing.dataset.feedback = "correct";
+        KeyboardRenderer.flash(noteNumber, "correct");
+        return;
+      }
+
+      targetRing.dataset.feedback = outcome.result;
+      KeyboardRenderer.flash(noteNumber, outcome.result);
+      if (outcome.result === "wrong") {
         setTimeout(() => KeyboardRenderer.setTarget(GameLogic.currentTargetNote()), 350);
+      }
+    },
+    onNoteOff: (noteNumber) => {
+      // En Modo Libre, la tecla se apaga apenas soltás la nota (feedback en vivo).
+      if (GameLogic.getMode() === "free") {
+        KeyboardRenderer.clearKey(noteNumber);
       }
     },
   });

@@ -111,11 +111,17 @@ const KeyboardRenderer = (() => {
     return noteNumber >= currentRange.low && noteNumber <= currentRange.high;
   }
 
+  /** Limpia el estado visual de una sola tecla (para feedback nota a nota, ej. Modo Libre). */
+  function clearKey(noteNumber) {
+    keyEls[noteNumber]?.classList.remove("key--target", "key--correct", "key--wrong");
+  }
+
   return {
     render,
     setTarget,
     flash,
     clearStates,
+    clearKey,
     inRange,
     rangeForKeyCount,
     presetForDeviceName,

@@ -23,6 +23,15 @@
 
   <main class="stage">
 
+    <div class="mode-switch" id="modeSwitch" role="group" aria-label="Modalidad de aprendizaje">
+      <button type="button" class="mode-switch__btn" data-mode="wait" aria-pressed="true">
+        Modo Espera
+      </button>
+      <button type="button" class="mode-switch__btn" data-mode="free" aria-pressed="false">
+        Modo Práctica Libre
+      </button>
+    </div>
+
     <section class="lesson-card" aria-live="polite">
       <p class="lesson-eyebrow" id="lessonEyebrow">Nivel 0 · Lección 1 · Mano derecha</p>
       <div class="target-note">
@@ -31,7 +40,7 @@
         </span>
         <p class="target-note__hint" id="targetHint">Tocá la tecla iluminada en tu piano</p>
       </div>
-      <div class="progress-track" aria-hidden="true">
+      <div class="progress-track" id="progressTrack" aria-hidden="true">
         <div class="progress-fill" id="progressFill"></div>
       </div>
     </section>
@@ -60,17 +69,17 @@
       <div class="panel">
         <h2>Modo</h2>
         <p id="modeLabel">Modo Espera</p>
-        <p class="panel__sub">La lección se pausa hasta que toques la nota correcta.</p>
+        <p class="panel__sub" id="modeSub">La lección se pausa hasta que toques la nota correcta.</p>
       </div>
       <div class="panel">
         <h2>Dispositivo</h2>
         <p id="deviceLabel">Sin conexión</p>
-        <p class="panel__sub" id="deviceSub">Conectá tu Roland FP-30X por USB o Bluetooth MIDI.</p>
+        <p class="panel__sub" id="deviceSub">Conectá tu Roland FP-30X por cable USB.</p>
       </div>
       <div class="panel">
-        <h2>Aciertos</h2>
+        <h2 id="scorePanelTitle">Aciertos</h2>
         <p id="scoreLabel">0 / 0</p>
-        <p class="panel__sub">Notas correctas en esta lección.</p>
+        <p class="panel__sub" id="scorePanelSub">Notas correctas en esta lección.</p>
       </div>
     </section>
 
