@@ -1,0 +1,273 @@
+/* ============================================================
+   PianoLearn — tokens
+   ============================================================ */
+:root{
+  --ebony: #1b1714;
+  --ebony-soft: #262019;
+  --ivory: #f6f1e6;
+  --ivory-key: #fffdf8;
+  --ivory-key-shadow: #d8cfba;
+  --brass: #c9a04a;
+  --brass-bright: #e6bd66;
+  --brass-dim: #8a6f34;
+  --ink: #2a2420;
+  --muted: #8a7f6e;
+  --correct: #4f9d6e;
+  --correct-glow: rgba(79,157,110,0.35);
+  --wrong: #c9524a;
+  --wrong-glow: rgba(201,82,74,0.35);
+
+  --font-display: "Fraunces", serif;
+  --font-body: "Inter", sans-serif;
+  --font-mono: "IBM Plex Mono", monospace;
+
+  --radius-lg: 18px;
+  --radius-md: 10px;
+}
+
+*{ box-sizing: border-box; }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+}
+
+html, body{
+  margin: 0;
+  min-height: 100%;
+  background: var(--ivory);
+  color: var(--ink);
+  font-family: var(--font-body);
+}
+
+/* ============================================================
+   Fallboard — the header, styled like the wood lid above piano keys
+   ============================================================ */
+.fallboard{
+  background:
+    linear-gradient(180deg, var(--ebony-soft) 0%, var(--ebony) 85%);
+  border-bottom: 4px solid var(--brass-dim);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.25);
+}
+.fallboard__inner{
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.brand{
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.4rem, 2.4vw, 1.9rem);
+  color: var(--ivory);
+  margin: 0;
+  letter-spacing: 0.01em;
+}
+.brand span{ color: var(--brass-bright); font-style: italic; }
+
+.status-pill{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.12);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ivory);
+}
+.status-dot{
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+.status-pill[data-state="connected"] .status-dot{ background: var(--correct); box-shadow: 0 0 8px var(--correct-glow); }
+.status-pill[data-state="connected"]{ border-color: rgba(79,157,110,0.35); }
+.status-pill[data-state="error"] .status-dot{ background: var(--wrong); }
+.status-pill[data-state="searching"] .status-dot{ animation: pulse 1.6s ease-in-out infinite; }
+
+@keyframes pulse{
+  0%, 100%{ opacity: 0.4; }
+  50%{ opacity: 1; }
+}
+
+/* ============================================================
+   Stage
+   ============================================================ */
+.stage{
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 40px 24px 24px;
+}
+
+.lesson-card{
+  text-align: center;
+  margin-bottom: 36px;
+}
+.lesson-eyebrow{
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 22px;
+}
+
+.target-note{ display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.target-note__ring{
+  width: 132px; height: 132px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--ivory-key);
+  border: 3px solid var(--brass);
+  box-shadow: 0 0 0 6px rgba(201,160,74,0.12), 0 8px 20px rgba(0,0,0,0.08);
+  transition: border-color 220ms ease, box-shadow 220ms ease, background 220ms ease;
+}
+.target-note__ring[data-feedback="correct"]{
+  border-color: var(--correct);
+  box-shadow: 0 0 0 6px var(--correct-glow), 0 8px 20px rgba(0,0,0,0.08);
+  background: #eef8f1;
+}
+.target-note__ring[data-feedback="wrong"]{
+  border-color: var(--wrong);
+  box-shadow: 0 0 0 6px var(--wrong-glow), 0 8px 20px rgba(0,0,0,0.08);
+  background: #fbeeed;
+}
+.target-note__label{
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.target-note__hint{
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.progress-track{
+  max-width: 320px;
+  margin: 22px auto 0;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--ivory-key-shadow);
+  overflow: hidden;
+}
+.progress-fill{
+  height: 100%;
+  width: 0%;
+  background: var(--brass);
+  transition: width 320ms ease;
+}
+
+/* ============================================================
+   Keyboard — real proportions, white + black keys
+   ============================================================ */
+.keyboard-wrap{
+  background: var(--ebony);
+  border-radius: var(--radius-lg);
+  padding: 18px 18px 0;
+  box-shadow: 0 14px 30px rgba(0,0,0,0.18);
+  overflow-x: auto;
+}
+.keyboard{
+  position: relative;
+  display: flex;
+  height: 176px;
+  min-width: 640px;
+}
+.key{
+  position: relative;
+  border: none;
+  cursor: default;
+  transition: background 120ms ease, box-shadow 120ms ease;
+}
+.key--white{
+  flex: 1 0 auto;
+  width: 40px;
+  height: 176px;
+  background: linear-gradient(180deg, var(--ivory-key) 0%, #efe9db 100%);
+  border-left: 1px solid var(--ivory-key-shadow);
+  border-right: 1px solid var(--ivory-key-shadow);
+  border-radius: 0 0 6px 6px;
+  z-index: 1;
+}
+.key--white:first-child{ border-top-left-radius: 4px; }
+.key--black{
+  position: absolute;
+  top: 0;
+  width: 24px;
+  height: 108px;
+  background: linear-gradient(180deg, #3a322a 0%, var(--ebony) 100%);
+  border-radius: 0 0 4px 4px;
+  z-index: 2;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.35);
+}
+.key__label{
+  position: absolute;
+  bottom: 10px;
+  left: 0; right: 0;
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--muted);
+  pointer-events: none;
+}
+.key--black .key__label{ color: rgba(255,255,255,0.45); }
+
+.key--target{ background: linear-gradient(180deg, var(--brass-bright) 0%, var(--brass) 100%); }
+.key--target .key__label{ color: var(--ebony); font-weight: 600; }
+.key--correct{ background: linear-gradient(180deg, #7fcb9c 0%, var(--correct) 100%); }
+.key--wrong{ background: linear-gradient(180deg, #e08a83 0%, var(--wrong) 100%); }
+
+/* ============================================================
+   Info panels
+   ============================================================ */
+.panel-row{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
+  margin-top: 28px;
+}
+.panel{
+  background: var(--ivory-key);
+  border: 1px solid var(--ivory-key-shadow);
+  border-radius: var(--radius-md);
+  padding: 16px 18px;
+}
+.panel h2{
+  margin: 0 0 6px;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+.panel p{ margin: 0; }
+.panel p:first-of-type + .panel__sub{ margin-top: 4px; }
+.panel__sub{ color: var(--muted); font-size: 0.82rem; }
+#modeLabel, #deviceLabel, #scoreLabel{
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.site-footer{
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 8px 24px 40px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  text-align: center;
+}
+
+@media (max-width: 640px){
+  .panel-row{ grid-template-columns: 1fr; }
+  .target-note__ring{ width: 108px; height: 108px; }
+  .target-note__label{ font-size: 2.1rem; }
+}

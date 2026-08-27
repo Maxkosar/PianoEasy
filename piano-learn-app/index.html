@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>PianoLearn — Nivel 0</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <header class="fallboard">
+    <div class="fallboard__inner">
+      <h1 class="brand">Piano<span>Learn</span></h1>
+      <div class="status-pill" id="midiStatus" data-state="searching">
+        <span class="status-dot"></span>
+        <span class="status-text">Buscando piano MIDI…</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="stage">
+
+    <section class="lesson-card" aria-live="polite">
+      <p class="lesson-eyebrow" id="lessonEyebrow">Nivel 0 · Lección 1 · Mano derecha</p>
+      <div class="target-note">
+        <span class="target-note__ring" id="targetRing">
+          <span class="target-note__label" id="targetLabel">Do</span>
+        </span>
+        <p class="target-note__hint" id="targetHint">Tocá la tecla iluminada en tu piano</p>
+      </div>
+      <div class="progress-track" aria-hidden="true">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+    </section>
+
+    <section class="keyboard-wrap">
+      <div class="keyboard" id="keyboard" role="img" aria-label="Teclado virtual de piano"></div>
+    </section>
+
+    <section class="panel-row">
+      <div class="panel">
+        <h2>Modo</h2>
+        <p id="modeLabel">Modo Espera</p>
+        <p class="panel__sub">La lección se pausa hasta que toques la nota correcta.</p>
+      </div>
+      <div class="panel">
+        <h2>Dispositivo</h2>
+        <p id="deviceLabel">Sin conexión</p>
+        <p class="panel__sub" id="deviceSub">Conectá tu Roland FP-30X por USB o Bluetooth MIDI.</p>
+      </div>
+      <div class="panel">
+        <h2>Aciertos</h2>
+        <p id="scoreLabel">0 / 0</p>
+        <p class="panel__sub">Notas correctas en esta lección.</p>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <p>Entrada Dual: MIDI (Roland FP-30X / USB / Bluetooth) — el modo micrófono se suma en una fase posterior.</p>
+  </footer>
+
+  <script src="js/midiEngine.js"></script>
+  <script src="js/keyboardRenderer.js"></script>
+  <script src="js/gameLogic.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
