@@ -165,6 +165,62 @@ html, body{
 }
 
 /* ============================================================
+   Keyboard size controls
+   ============================================================ */
+.keyboard-controls{
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+  font-size: 0.88rem;
+}
+.keyboard-controls label{
+  font-family: var(--font-mono);
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+}
+.keyboard-controls select,
+.keyboard-controls input[type="number"]{
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  padding: 7px 10px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--ivory-key-shadow);
+  background: var(--ivory-key);
+  color: var(--ink);
+}
+.keyboard-controls input[type="number"]{ width: 84px; }
+.keyboard-controls button{
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.86rem;
+  padding: 7px 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--brass-dim);
+  background: var(--brass);
+  color: var(--ebony);
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+.keyboard-controls button:hover{ background: var(--brass-bright); }
+.keyboard-controls button:focus-visible,
+.keyboard-controls select:focus-visible,
+.keyboard-controls input:focus-visible{
+  outline: 2px solid var(--brass-dim);
+  outline-offset: 2px;
+}
+.keyboard-controls__note{
+  flex-basis: 100%;
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.4;
+}
+
+/* ============================================================
    Keyboard — real proportions, white + black keys
    ============================================================ */
 .keyboard-wrap{
@@ -178,7 +234,7 @@ html, body{
   position: relative;
   display: flex;
   height: 176px;
-  min-width: 640px;
+  /* el ancho real lo fija KeyboardRenderer según la cantidad de teclas */
 }
 .key{
   position: relative;
@@ -187,8 +243,10 @@ html, body{
   transition: background 120ms ease, box-shadow 120ms ease;
 }
 .key--white{
-  flex: 1 0 auto;
-  width: 40px;
+  /* ancho fijo (no flex-grow): así las negras, posicionadas en px por JS,
+     quedan siempre alineadas sin importar cuántas teclas haya en total */
+  flex: 0 0 34px;
+  width: 34px;
   height: 176px;
   background: linear-gradient(180deg, var(--ivory-key) 0%, #efe9db 100%);
   border-left: 1px solid var(--ivory-key-shadow);
@@ -200,7 +258,7 @@ html, body{
 .key--black{
   position: absolute;
   top: 0;
-  width: 24px;
+  width: 20px;
   height: 108px;
   background: linear-gradient(180deg, #3a322a 0%, var(--ebony) 100%);
   border-radius: 0 0 4px 4px;

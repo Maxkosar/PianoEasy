@@ -36,6 +36,22 @@
       </div>
     </section>
 
+    <section class="keyboard-controls">
+      <label for="keySizeSelect">Tamaño de tu teclado</label>
+      <select id="keySizeSelect">
+        <option value="25">25 teclas · 2 octavas</option>
+        <option value="37">37 teclas · 3 octavas</option>
+        <option value="49">49 teclas · 4 octavas</option>
+        <option value="61" selected>61 teclas · 5 octavas</option>
+        <option value="76">76 teclas</option>
+        <option value="88">88 teclas · piano completo</option>
+        <option value="custom">Otra cantidad…</option>
+      </select>
+      <input type="number" id="keyCountCustom" min="12" max="108" value="61" style="display:none" aria-label="Cantidad de teclas personalizada" />
+      <button type="button" id="applyKeyboardSize">Aplicar</button>
+      <p class="keyboard-controls__note" id="keyboardAutoNote"></p>
+    </section>
+
     <section class="keyboard-wrap">
       <div class="keyboard" id="keyboard" role="img" aria-label="Teclado virtual de piano"></div>
     </section>
@@ -61,7 +77,7 @@
   </main>
 
   <footer class="site-footer">
-    <p>Entrada Dual: MIDI (Roland FP-30X / USB / Bluetooth) — el modo micrófono se suma en una fase posterior.</p>
+    <p>Entrada MIDI por cable USB (Roland FP-30X u otro controlador) — el modo micrófono se suma en una fase posterior.</p>
   </footer>
 
   <script src="js/midiEngine.js"></script>

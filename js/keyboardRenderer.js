@@ -1,55 +1,91 @@
 /**
  * keyboardRenderer.js
- * Dibuja un teclado virtual (2 octavas, C3–B4) con proporciones reales
- * y expone métodos para iluminar teclas (target / correcto / incorrecto).
+ * Dibuja un teclado virtual dado un rango de notas MIDI [lowNote, highNote]
+ * con proporciones reales de teclas blancas/negras, y expone métodos para
+ * iluminar teclas (target / correcto / incorrecto).
+ *
+ * Nota importante: Web MIDI API no informa cuántas teclas tiene el
+ * dispositivo físico conectado (el protocolo no expone esa propiedad).
+ * Por eso KEY_COUNT_PRESETS existe: mapea tamaños comerciales estándar
+ * a su rango real de notas, y KNOWN_DEVICE_PRESETS asocia el *nombre*
+ * de algunos dispositivos conocidos (ej. "FP-30X" = 88 teclas) a un preset,
+ * pero siempre es una inferencia, no una lectura directa del hardware.
  */
 const KeyboardRenderer = (() => {
-  const WHITE_STEPS = ["C", "D", "E", "F", "G", "A", "B"];
-  const BLACK_AFTER = { C: "C#", D: "D#", F: "F#", G: "G#", A: "A#" }; // negra tras esta blanca
+  const NOTE_NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
+  const WHITE_SET = new Set(["C", "D", "E", "F", "G", "A", "B"]);
+
+  const WHITE_KEY_WIDTH = 34;
+  const BLACK_KEY_WIDTH = 20;
+
+  // Rangos reales de teclados comerciales estándar (nota MIDI baja/alta).
+  const KEY_COUNT_PRESETS = {
+    25: { low: 48, high: 72, label: "25 teclas · 2 octavas (C3–C5)" },
+    37: { low: 36, high: 72, label: "37 teclas · 3 octavas (C2–C5)" },
+    49: { low: 36, high: 84, label: "49 teclas · 4 octavas (C2–C6)" },
+    61: { low: 36, high: 96, label: "61 teclas · 5 octavas (C2–C7)" },
+    76: { low: 28, high: 103, label: "76 teclas (E1–G7)" },
+    88: { low: 21, high: 108, label: "88 teclas · piano completo (A0–C8)" },
+  };
+
+  // Nombres de dispositivo conocidos → preset a aplicar automáticamente.
+  const KNOWN_DEVICE_PRESETS = [{ pattern: /FP-30X/i, keyCount: 88 }];
 
   let container = null;
   let keyEls = {}; // noteNumber -> element
+  let currentRange = { low: 36, high: 96 };
 
-  function midiFromNameOctave(name, octave) {
-    const idx = ["C","C#","D","D#","E","F","F#","G","G#","A","A#","B"].indexOf(name);
-    return (octave + 1) * 12 + idx;
+  function noteLabel(noteNumber) {
+    return `${NOTE_NAMES[noteNumber % 12]}${Math.floor(noteNumber / 12) - 1}`;
   }
 
-  function render(el, { startOctave = 3, octaves = 2 } = {}) {
+  function rangeForKeyCount(count) {
+    if (KEY_COUNT_PRESETS[count]) return KEY_COUNT_PRESETS[count];
+    // Cantidad personalizada: arranca en C3 hacia arriba.
+    const low = 48;
+    return { low, high: low + Math.max(1, count) - 1, label: `${count} teclas (personalizado)` };
+  }
+
+  function presetForDeviceName(name) {
+    if (!name) return null;
+    const match = KNOWN_DEVICE_PRESETS.find((d) => d.pattern.test(name));
+    return match ? match.keyCount : null;
+  }
+
+  function render(el, { low, high } = {}) {
     container = el;
     container.innerHTML = "";
     keyEls = {};
+    currentRange = { low, high };
 
-    const whiteKeyWidth = 40;
-    let whiteIndex = 0;
+    let whiteCount = 0;
+    const fragment = document.createDocumentFragment();
 
-    for (let o = 0; o < octaves; o++) {
-      const octave = startOctave + o;
-      WHITE_STEPS.forEach((step) => {
-        const midiNum = midiFromNameOctave(step, octave);
-        const whiteKey = document.createElement("div");
-        whiteKey.className = "key key--white";
-        whiteKey.dataset.note = midiNum;
+    for (let n = low; n <= high; n++) {
+      const name = NOTE_NAMES[n % 12];
+      if (WHITE_SET.has(name)) {
+        const key = document.createElement("div");
+        key.className = "key key--white";
+        key.dataset.note = n;
         const label = document.createElement("span");
         label.className = "key__label";
-        label.textContent = `${step}${octave}`;
-        whiteKey.appendChild(label);
-        container.appendChild(whiteKey);
-        keyEls[midiNum] = whiteKey;
-
-        if (BLACK_AFTER[step]) {
-          const blackName = BLACK_AFTER[step];
-          const blackMidi = midiFromNameOctave(blackName, octave);
-          const blackKey = document.createElement("div");
-          blackKey.className = "key key--black";
-          blackKey.dataset.note = blackMidi;
-          blackKey.style.left = `${(whiteIndex + 1) * whiteKeyWidth - 12}px`;
-          container.appendChild(blackKey);
-          keyEls[blackMidi] = blackKey;
-        }
-        whiteIndex++;
-      });
+        label.textContent = noteLabel(n);
+        key.appendChild(label);
+        fragment.appendChild(key);
+        keyEls[n] = key;
+        whiteCount++;
+      } else {
+        const key = document.createElement("div");
+        key.className = "key key--black";
+        key.dataset.note = n;
+        key.style.left = `${whiteCount * WHITE_KEY_WIDTH - BLACK_KEY_WIDTH / 2}px`;
+        fragment.appendChild(key);
+        keyEls[n] = key;
+      }
     }
+
+    container.style.width = `${whiteCount * WHITE_KEY_WIDTH}px`;
+    container.appendChild(fragment);
   }
 
   function clearStates() {
@@ -71,5 +107,18 @@ const KeyboardRenderer = (() => {
     el.classList.add(state === "correct" ? "key--correct" : "key--wrong");
   }
 
-  return { render, setTarget, flash, clearStates };
+  function inRange(noteNumber) {
+    return noteNumber >= currentRange.low && noteNumber <= currentRange.high;
+  }
+
+  return {
+    render,
+    setTarget,
+    flash,
+    clearStates,
+    inRange,
+    rangeForKeyCount,
+    presetForDeviceName,
+    KEY_COUNT_PRESETS,
+  };
 })();
